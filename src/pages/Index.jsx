@@ -1,12 +1,15 @@
 import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Camera, Music, Moon } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { Cat, Heart, Info, Paw, Camera, Music, Moon, Sun, Zap } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const catBreeds = [
   { name: "Siamese", description: "Vocal and social cats known for their distinctive color points." },
@@ -28,7 +31,11 @@ const Index = () => {
   const [likes, setLikes] = useState(0);
   const [currentFactIndex, setCurrentFactIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [quizAnswer, setQuizAnswer] = useState("");
   const { toast } = useToast();
+  const { scrollYProgress } = useScroll();
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,17 +61,55 @@ const Index = () => {
     });
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    document.documentElement.classList.toggle("dark");
+  };
+
+  const handleQuizSubmit = () => {
+    if (quizAnswer.toLowerCase() === "meow") {
+      toast({
+        title: "Correct!",
+        description: "You speak cat language fluently!",
+      });
+    } else {
+      toast({
+        title: "Not quite!",
+        description: "Hint: It's the most common cat sound!",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-100 p-8">
-      <div className="max-w-4xl mx-auto">
-        <motion.h1 
-          className="text-6xl font-bold mb-6 flex items-center justify-center text-purple-700"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-b from-gray-900 to-purple-900 text-white' : 'bg-gradient-to-b from-purple-100 to-pink-100'} transition-colors duration-500`}>
+      <div className="max-w-4xl mx-auto p-8">
+        <motion.div 
+          className="relative h-[50vh] mb-12 overflow-hidden rounded-xl shadow-2xl"
+          style={{ y }}
         >
-          <Cat className="mr-2 text-pink-500 h-12 w-12" /> Feline Fascination
-        </motion.h1>
+          <img 
+            src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" 
+            alt="Cat Hero" 
+            className="object-cover w-full h-full"
+          />
+          <motion.h1 
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl font-bold text-white text-center shadow-text"
+            initial={{ opacity: 0, y: -50 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <Cat className="inline-block mr-2 text-pink-500 h-12 w-12" /> Feline Fascination
+          </motion.h1>
+        </motion.div>
+
+        <div className="flex justify-end mb-4">
+          <div className="flex items-center space-x-2">
+            <Sun className="h-5 w-5 text-yellow-500" />
+            <Switch id="theme-mode" checked={isDarkMode} onCheckedChange={toggleTheme} />
+            <Moon className="h-5 w-5 text-blue-500" />
+          </div>
+        </div>
         
         <motion.div 
           className="relative mb-8"
@@ -200,12 +245,12 @@ const Index = () => {
         </Tabs>
 
         <motion.div
-          className="text-center"
+          className="text-center mb-12"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <p className="text-xl text-gray-700 mb-4">
+          <p className={`text-xl ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-4`}>
             Whether you're a cat owner or just an admirer, these furry friends continue to 
             captivate us with their charm and personality.
           </p>
@@ -213,6 +258,50 @@ const Index = () => {
             <Info className="mr-2 h-4 w-4" /> Learn More About Cats
           </Button>
         </motion.div>
+
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle className="flex items-center"><Zap className="mr-2 text-yellow-500" /> Cat Quiz</CardTitle>
+            <CardDescription>Test your cat knowledge!</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="mb-4">What sound does a cat make?</p>
+            <input
+              type="text"
+              value={quizAnswer}
+              onChange={(e) => setQuizAnswer(e.target.value)}
+              className="w-full p-2 mb-4 border rounded"
+              placeholder="Enter your answer"
+            />
+            <Button onClick={handleQuizSubmit}>Submit Answer</Button>
+          </CardContent>
+        </Card>
+
+        <Card className="mb-12">
+          <CardHeader>
+            <CardTitle className="flex items-center"><Heart className="mr-2 text-red-500" /> Cat Adoption</CardTitle>
+            <CardDescription>Find your purr-fect companion</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {[
+                { name: "Whiskers", age: 2, image: "https://placekitten.com/200/200" },
+                { name: "Luna", age: 1, image: "https://placekitten.com/201/201" },
+              ].map((cat) => (
+                <motion.div
+                  key={cat.name}
+                  className="bg-white p-4 rounded-lg shadow-md"
+                  whileHover={{ scale: 1.05 }}
+                >
+                  <img src={cat.image} alt={cat.name} className="w-full h-40 object-cover rounded-md mb-2" />
+                  <h3 className="text-lg font-semibold">{cat.name}</h3>
+                  <p>Age: {cat.age} years</p>
+                  <Button className="mt-2 w-full">Adopt {cat.name}</Button>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
