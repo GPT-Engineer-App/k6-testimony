@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
-import { Cat, Heart, Info, Paw, Camera, Music, Moon, Sun, Zap } from "lucide-react";
-import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { useState, useEffect, useRef } from "react";
+import { Cat, Heart, Info, Paw, Camera, Music, Moon, Sun, Zap, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform, useInView } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Progress } from "@/components/ui/progress";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 const catBreeds = [
   { name: "Siamese", description: "Vocal and social cats known for their distinctive color points." },
@@ -36,6 +38,8 @@ const Index = () => {
   const { toast } = useToast();
   const { scrollYProgress } = useScroll();
   const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const heroRef = useRef(null);
+  const isHeroInView = useInView(heroRef, { once: true });
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -83,9 +87,10 @@ const Index = () => {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'bg-gradient-to-b from-gray-900 to-purple-900 text-white' : 'bg-gradient-to-b from-purple-100 to-pink-100'} transition-colors duration-500`}>
-      <div className="max-w-4xl mx-auto p-8">
+      <div className="max-w-6xl mx-auto p-8">
         <motion.div 
-          className="relative h-[50vh] mb-12 overflow-hidden rounded-xl shadow-2xl"
+          ref={heroRef}
+          className="relative h-[80vh] mb-12 overflow-hidden rounded-xl shadow-2xl"
           style={{ y }}
         >
           <img 
@@ -93,14 +98,36 @@ const Index = () => {
             alt="Cat Hero" 
             className="object-cover w-full h-full"
           />
+          <motion.div 
+            className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 1 }}
+          />
           <motion.h1 
-            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-6xl font-bold text-white text-center shadow-text"
+            className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-7xl font-bold text-white text-center shadow-text"
             initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            <Cat className="inline-block mr-2 text-pink-500 h-12 w-12" /> Feline Fascination
+            <Cat className="inline-block mr-2 text-pink-500 h-16 w-16" /> Feline Fascination
           </motion.h1>
+          <motion.p
+            className="absolute bottom-1/4 left-1/2 transform -translate-x-1/2 text-2xl text-white text-center max-w-2xl"
+            initial={{ opacity: 0, y: 50 }}
+            animate={isHeroInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            Discover the enchanting world of cats and their mesmerizing charm
+          </motion.p>
+          <motion.div
+            className="absolute bottom-12 left-1/2 transform -translate-x-1/2"
+            initial={{ opacity: 0 }}
+            animate={isHeroInView ? { opacity: 1, y: [0, 10, 0] } : {}}
+            transition={{ duration: 1.5, delay: 0.6, repeat: Infinity, repeatType: "loop" }}
+          >
+            <ChevronDown className="h-12 w-12 text-white" />
+          </motion.div>
         </motion.div>
 
         <div className="flex justify-end mb-4">
@@ -112,12 +139,12 @@ const Index = () => {
         </div>
         
         <motion.div 
-          className="relative mb-8"
+          className="relative mb-16"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
         >
-          <Carousel className="w-full max-w-4xl mx-auto">
+          <Carousel className="w-full max-w-5xl mx-auto">
             <CarouselContent>
               {[
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Cat03.jpg/1200px-Cat03.jpg",
@@ -125,25 +152,37 @@ const Index = () => {
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Kittyply_edit1.jpg/1200px-Kittyply_edit1.jpg"
               ].map((src, index) => (
                 <CarouselItem key={index}>
-                  <div className="p-1">
+                  <motion.div 
+                    className="p-1"
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ duration: 0.3 }}
+                  >
                     <img
                       src={src}
                       alt={`Cute cat ${index + 1}`}
-                      className="mx-auto object-cover w-full h-[500px] rounded-lg shadow-2xl"
+                      className="mx-auto object-cover w-full h-[600px] rounded-lg shadow-2xl"
                     />
-                  </div>
+                  </motion.div>
                 </CarouselItem>
               ))}
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
           </Carousel>
-          <Button 
-            className="absolute bottom-4 right-4 bg-pink-500 hover:bg-pink-600"
-            onClick={handleLike}
+          <motion.div
+            className="absolute bottom-4 right-4 flex items-center space-x-2"
+            whileHover={{ scale: 1.1 }}
           >
-            <Heart className="mr-2 h-4 w-4" /> Like ({likes})
-          </Button>
+            <Button 
+              className="bg-pink-500 hover:bg-pink-600"
+              onClick={handleLike}
+            >
+              <Heart className="mr-2 h-4 w-4" /> Like
+            </Button>
+            <Badge variant="secondary" className="text-lg font-bold">
+              {likes}
+            </Badge>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -259,49 +298,89 @@ const Index = () => {
           </Button>
         </motion.div>
 
-        <Card className="mb-12">
-          <CardHeader>
-            <CardTitle className="flex items-center"><Zap className="mr-2 text-yellow-500" /> Cat Quiz</CardTitle>
-            <CardDescription>Test your cat knowledge!</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="mb-4">What sound does a cat make?</p>
-            <input
-              type="text"
-              value={quizAnswer}
-              onChange={(e) => setQuizAnswer(e.target.value)}
-              className="w-full p-2 mb-4 border rounded"
-              placeholder="Enter your answer"
-            />
-            <Button onClick={handleQuizSubmit}>Submit Answer</Button>
-          </CardContent>
-        </Card>
-
-        <Card className="mb-12">
-          <CardHeader>
-            <CardTitle className="flex items-center"><Heart className="mr-2 text-red-500" /> Cat Adoption</CardTitle>
-            <CardDescription>Find your purr-fect companion</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { name: "Whiskers", age: 2, image: "https://placekitten.com/200/200" },
-                { name: "Luna", age: 1, image: "https://placekitten.com/201/201" },
-              ].map((cat) => (
-                <motion.div
-                  key={cat.name}
-                  className="bg-white p-4 rounded-lg shadow-md"
-                  whileHover={{ scale: 1.05 }}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <Card className="mb-12 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
+              <CardTitle className="flex items-center text-2xl"><Zap className="mr-2 text-white" /> Cat Quiz Challenge</CardTitle>
+              <CardDescription className="text-white/80">Put your feline knowledge to the test!</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <motion.p 
+                className="mb-4 text-lg font-semibold"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                What sound does a cat make?
+              </motion.p>
+              <motion.div
+                className="space-y-4"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <Input
+                  type="text"
+                  value={quizAnswer}
+                  onChange={(e) => setQuizAnswer(e.target.value)}
+                  className="w-full p-2 border rounded"
+                  placeholder="Enter your answer"
+                />
+                <Button 
+                  onClick={handleQuizSubmit}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
                 >
-                  <img src={cat.image} alt={cat.name} className="w-full h-40 object-cover rounded-md mb-2" />
-                  <h3 className="text-lg font-semibold">{cat.name}</h3>
-                  <p>Age: {cat.age} years</p>
-                  <Button className="mt-2 w-full">Adopt {cat.name}</Button>
-                </motion.div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                  Submit Answer
+                </Button>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          <Card className="mb-12 overflow-hidden">
+            <CardHeader className="bg-gradient-to-r from-red-500 to-pink-500 text-white">
+              <CardTitle className="flex items-center text-2xl"><Heart className="mr-2 text-white" /> Cat Adoption Center</CardTitle>
+              <CardDescription className="text-white/80">Find your purr-fect feline companion</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[
+                  { name: "Whiskers", age: 2, image: "https://placekitten.com/300/300", personality: "Playful" },
+                  { name: "Luna", age: 1, image: "https://placekitten.com/301/301", personality: "Cuddly" },
+                  { name: "Oliver", age: 3, image: "https://placekitten.com/302/302", personality: "Independent" },
+                ].map((cat, index) => (
+                  <motion.div
+                    key={cat.name}
+                    className="bg-white rounded-lg shadow-lg overflow-hidden"
+                    whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0,0,0,0.2)" }}
+                    initial={{ opacity: 0, y: 50 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.1 * index }}
+                  >
+                    <img src={cat.image} alt={cat.name} className="w-full h-48 object-cover" />
+                    <div className="p-4">
+                      <h3 className="text-xl font-semibold mb-2">{cat.name}</h3>
+                      <p className="text-gray-600 mb-2">Age: {cat.age} years</p>
+                      <p className="text-gray-600 mb-4">Personality: {cat.personality}</p>
+                      <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+                        Adopt {cat.name}
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );
